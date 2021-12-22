@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <title>list</title>
+</head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<body>
+    <div class="container">
+        <div >
+            <div class="d-flex justify-content-between">
+                <div
+                    ><span>Danh sách thành phố</span
+                ></div
+                ><div
+                    ><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_city">Thêm Thành Phố</button
+                ></div>
+            </div>
+        </div>
+        <div class="table">
+            <table class="table table-hover" id="table__city">
+                <tr>
+                    <th>#</th>
+                    <th>Thành Phố</th>
+                    <th>Quốc Gia</th>
+                    <th>Change</th>
+                    <th>Delete</th>
+                </tr>
+
+            </table>
+        </div>
+    </div>
+
+
+<!--    fate-->
+    <div class="modal fade" id="add_city" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Thêm Thành Phố</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+
+
+                    <form>
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="name" >
+                        </div>
+                        <div class="mb-3">
+                            <label for="area" class="form-label">Area</label>
+                            <input type="text" class="form-control" id="area">
+                        </div>
+                        <div class="mb-3">
+                            <label for="popu" class="form-label">Population</label>
+                            <input type="text" class="form-control" id="popu">
+                        </div>
+                        <div class="mb-3">
+                            <label for="gdp" class="form-label">GDP</label>
+                            <input type="text" class="form-control" id="gdp">
+                        </div>
+                        <div class="mb-3">
+                            <label for="des" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="des">
+                        </div>
+                        <div>
+                            <label for="national" class="form-label">Quốc Gia</label>
+                            <select name="national" id="national" style="width: 100%">
+                                <option value="1">VN</option>
+                            </select>
+                        </div>
+
+                    </form>
+
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="add_city()">Thêm mới</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</body>
+<script>
+    get_all_city();
+    // -------------
+
+    function add_city(){
+        let name = $('#name').val();
+            let area = $('#area').val();
+            let popu =$('#popu').val()
+            let gdp = $('#gdp').val();
+            let des = $('#des').val();
+            let national = $('#national').val();
+            let city = {
+                'name':name,
+                'area':area,
+                'population':popu,
+                'gdp':gdp,
+                'description':des,
+                'national':{
+                    'id':national
+                }
+            }
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "POST",
+            url: `http://localhost:8081/cities`,
+            data:JSON.stringify(city),
+            success: get_all_city()
+        })
+        get_all_city();
+    }
+    function get_all_city(){
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: `http://localhost:8081/cities`,
+            success: function (data){
+                let table = document.getElementById("table__city");
+                let content='<tr>\n' +
+                    '                    <th>#</th>\n' +
+                    '                    <th>Thành Phố</th>\n' +
+                    '                    <th>Quốc Gia</th>\n' +
+                    '                    <th>Change</th>\n' +
+                    '                    <th>Delete</th>\n' +
+                    '                </tr>';
+                for (let i=0;i<data.length;i++) {
+                    content += '<tr>\n' +
+                        '                    <td>'+(i+1)+'</td>\n' +
+                        '                    <td>'+data[i].name+'</td>\n' +
+                        '                    <td>'+data[i].national.name+'</td>\n' +
+                        '                    <td><button  type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#edit_city'+i+'">Xem\n' +
+                        '                    Thành Phố</button></td>\n' +
+                        '                    <td><a href="#" onclick="delete_city('+data[i].id+')">Xoa</a></td>\n' +
+                        '                </tr>';
+
+                    content += '<div class="modal fade" id="edit_city'+i+'" tabindex="-1" aria-labelledby="example2ModalLabel'+i+'" aria-hidden="true">\n' +
+                        '        <div class="modal-dialog">\n' +
+                        '            <div class="modal-content">\n' +
+                        '                <div class="modal-header">\n' +
+                        '                    <h5 class="modal-title" id="example2ModalLabel'+i+'">Sửa Thành Phố</h5>\n' +
+                        '                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" ></button>\n' +
+                        '                </div>\n' +
+                        '                <div class="modal-body">\n' +
+                        '                    <form>\n' +
+                        '                        <div class="mb-3">\n' +
+                        '                            <label for="name2" class="form-label">Name</label>\n' +
+                        '                            <input type="text" class="form-control" id="name'+data[i].id+'" value="'+data[i].name+'" >\n' +
+                        '                        </div>\n' +
+                        '                        <div class="mb-3">\n' +
+                        '                            <label for="area2" class="form-label">Area</label>\n' +
+                        '                            <input type="text" class="form-control" id="area'+data[i].id+'" value="'+data[i].name+'">\n' +
+                        '                        </div>\n' +
+                        '                        <div class="mb-3">\n' +
+                        '                            <label for="popu2" class="form-label">Population</label>\n' +
+                        '                            <input type="text" class="form-control" id="popu'+data[i].id+'" value="'+data[i].name+'">\n' +
+                        '                        </div>\n' +
+                        '                        <div class="mb-3">\n' +
+                        '                            <label for="gdp2" class="form-label">GDP</label>\n' +
+                        '                            <input type="text" class="form-control" id="gdp'+data[i].id+'" value="'+data[i].name+'">\n' +
+                        '                        </div>\n' +
+                        '                        <div class="mb-3">\n' +
+                        '                            <label for="des2" class="form-label">Description</label>\n' +
+                        '                            <input type="text" class="form-control" id="des'+data[i].id+'" value="'+data[i].name+'">\n' +
+                        '                        </div>\n' +
+                        '                        <div>\n' +
+                        '                            <label for="national2" class="form-label">Quốc Gia</label>\n' +
+                        '                            <select name="national" id="national'+data[i].id+'" style="width: 100%">\n' +
+                        '                                <option value="1">VN</option>\n' +
+                        '                            </select>\n' +
+                        '                        </div>\n' +
+                        '\n' +
+                        '                    </form>\n' +
+                        '                </div>\n' +
+                        '                <div class="modal-footer">\n' +
+                        '                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>\n' +
+                        '                    <button type="button" class="btn btn-primary" id="edit__city" onclick="edit_city_by_id('+data[i].id+')" >Sửa thành phố</button>\n' +
+                        '                </div>\n' +
+                        '            </div>\n' +
+                        '        </div>\n' +
+                        '    </div>'
+                get_all_national_i(data[i].id);
+                }
+                    get_all_national();
+                table.innerHTML = content;
+
+            }
+        })
+    }
+
+    function edit_city_by_id(id) {
+        let names = '#name'+id
+        let areas ='#area'+id
+        let popus ='#popu'+id
+        let gdps = '#gdp'+id
+        let dess ='#des'+id
+        let nats ='#national'+id
+        let name = $(names).val();
+        let area = $(areas).val();
+        let popu =$(popus).val()
+        let gdp = $(gdps).val();
+        let des = $(dess).val();
+        let national = $(nats).val();
+        let city = {
+            'name':name,
+            'area':area,
+            'population':popu,
+            'gdp':gdp,
+            'description':des,
+            'national':{
+                'id':national
+            }
+        }
+        $.ajax({
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "PUT",
+            url: `http://localhost:8081/cities/`+id,
+            data:JSON.stringify(city),
+            success: get_all_city(),
+        })
+        get_all_city();
+    }
+
+    function delete_city(id){
+        event.preventDefault();
+        $.ajax({
+            headers: {
+                'Accept' : 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "DELETE",
+            url: `http://localhost:8081/cities/`+id,
+            success: get_all_city(),
+        })
+        get_all_city();
+    }
+
+    function get_all_national(){
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: `http://localhost:8081/nationals`,
+            success: function (national){
+                let modal = document.getElementById("national");
+                let content='';
+                for (let i=0;i<national.length;i++) {
+                    content += '<option  value="'+national[i].id+'">'+national[i].name+'</option>'
+                }
+                modal.innerHTML = content;
+            }
+        })
+    }
+
+    function get_all_national_i(index){
+        $.ajax({
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            type: "GET",
+            url: `http://localhost:8081/nationals`,
+            success: function (national){
+                let new_id='national'+index
+                let modal = document.getElementById(new_id);
+                let content='';
+                for (let i=0;i<national.length;i++) {
+                    content += '<option  value="'+national[i].id+'">'+national[i].name+'</option>'
+                }
+                modal.innerHTML = content;
+            }
+        })
+    }
+</script>
+</html>
